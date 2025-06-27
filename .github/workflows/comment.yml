@@ -45,13 +45,17 @@ jobs:
 
             const body = {
               "user_id": "ftsai", 
-              "prompts": ["what is a good test in unit testing?"]
+              "prompts": ["what is a good test in unit testing?"],
               "model": "ollama.deepseek-r1:latest"
             }
 
             console.log(`Calling API: ${apiUrl}`);
             
-            const response = await fetch(apiUrl, { headers: headers, body: body });
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(body)
+            });
             const data = await response.json();
             
             console.log(data)
