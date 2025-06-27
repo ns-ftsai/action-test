@@ -58,6 +58,7 @@ jobs:
             });
             const data = await response.json();
             
+            console.log('data received')
             console.log(data)
 
             // Post a comment on the pull request
@@ -66,5 +67,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: data
+              body: data.response
             });
