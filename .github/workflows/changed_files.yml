@@ -18,4 +18,4 @@ jobs:
 
       - name: Echo the changed files
         run: |
-          echo "All changed files: ${{ steps.changed_files.outputs.all_changed_files }}"
+          echo "All changed files: ${{ steps.changed_files.outputs.all_changed_files_as_json }}"
