@@ -15,6 +15,9 @@ jobs:
       - name: Get changed files
         id: changed_files # Give the step an ID to reference its outputs
         uses: tj-actions/changed-files@v44
+        with:
+          # This output provides a JSON-formatted string of the array
+          json: true
 
       - name: Echo the changed files
         run: |
