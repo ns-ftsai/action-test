@@ -19,8 +19,7 @@ jobs:
         run: |
           # Create a patch file containing all changes
           git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch
-          console.log(`${changes.patch}`)
-          
+          cat changes.patch          
           # Check if the patch file is empty
           if [ ! -s changes.patch ]; then
             echo "No content changes detected."
