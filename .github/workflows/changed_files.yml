@@ -12,13 +12,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Get changed files
-        id: changed_files # Give the step an ID to reference its outputs
-        uses: tj-actions/changed-files@v44
-        with:
-          # This output provides a JSON-formatted string of the array
-          json: true
-
-      - name: Echo the changed files
+      - name: Generate diff patch file
+        id: generate_diff
         run: |
-          echo "All changed files: ${{ steps.changed_files.outputs.all_changed_files_as_json }}"
+          # Create a patch file containing all changes
+          git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch
+          echo changes.patch
+          
+          # Check if the patch file is empty
+          if [ ! -s changes.patch ]; then
+            echo "No content changes detected."
+            echo "IS_EMPTY=true" >> $GITHUB_OUTPUT
+          fi
