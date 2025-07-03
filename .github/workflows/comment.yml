@@ -120,9 +120,6 @@ jobs:
             - **Prompt**: Analyze and summarize the following code changes in this pull request
 
             </details>`;
-            - **Prompt**: Analyze and summarize the following code changes in this pull request
-
-            </details>`;
 
             // Post a comment on the pull request
             await github.rest.issues.createComment({
