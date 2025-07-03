@@ -78,7 +78,7 @@ jobs:
 
             const body = {
               "user_id": "ftsai", 
-              "prompts": [`Analyze and summarize the following code changes in this pull request:\n\n${patchContent}`],
+              "prompts": [`Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}`],
               "model": "ollama.deepseek-r1:latest"
             }
 
