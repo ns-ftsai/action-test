@@ -79,7 +79,7 @@ jobs:
 
             const body = {
               "user_id": "ftsai", 
-              "prompts": [`How are you? How can i help you?`],
+              "prompts": ["What can you assist me with?"],
               "model": "ollama.deepseek-r1:latest"
             }
 
