@@ -1,42 +1,73 @@
-# Name for your workflow
 name: PR Comment Bot
 
-# Controls when the action will run.
 on:
   # This specifies that the workflow should trigger on pull_request events.
   pull_request:
     # We only want to run this when a pull request is first opened.
-    types: [opened]
+    # types: [opened]
+
+    # For testing purpose, check it once the PR is opened.
+    branches:
+      - main
     
   workflow_dispatch:
-    # This allows the workflow to be manually triggered from the GitHub UI.
 
-# A workflow run is made up of one or more jobs
 jobs:
-  # The name of our job
-  add-comment:
-    # The type of virtual machine to run the job on
+  Comment-on-PR:
     runs-on: ubuntu-latest
 
     # This gives the action the necessary permissions to write a comment on the pull request.
     permissions:
+      contents: read
       pull-requests: write
 
-    # A sequence of tasks that will be executed as part of the job
     steps:
-      # This is the step that will post the comment.
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Add comment to PR
-        # We are using the pre-built 'github-script' action
         uses: actions/github-script@v7
         with:
-          # The 'github-token' is automatically created and provided by Actions.
-          # We don't need to do anything to set it up.
           github-token: ${{secrets.GITHUB_TOKEN}}
-          # This is the script that will be executed.
           script: |
-            // Get the pull request number from the event context
+            const fs = require('fs');
+            const { execSync } = require('child_process');
 
+            // Get the pull request number from the event context
             const issue_number = context.issue.number;
+
+            // Create a patch file containing all changes
+            try {
+              execSync(`git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch`);
+            } catch (error) {
+              console.log('Error creating git diff:', error.message);
+              // Try alternative method
+              try {
+                execSync(`git diff HEAD~1 HEAD > changes.patch`);
+                console.log('Used HEAD~1 HEAD as fallback for git diff');
+              } catch (fallbackError) {
+                console.log('Fallback git diff also failed:', fallbackError.message);
+                return;
+              }
+            }
+            
+            // Read the patch file content
+            let patchContent = '';
+            try {
+              patchContent = fs.readFileSync('changes.patch', 'utf8');
+              console.log('Patch content:', patchContent);
+            } catch (error) {
+              console.log('Error reading patch file:', error);
+              patchContent = 'No changes detected or error reading patch file.';
+            }
+
+            // Check if the patch file is empty
+            if (!patchContent || patchContent.trim() === '') {
+              console.log("No content changes detected.");
+              return;
+            }
 
             const apiUrl = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';
             console.log(`Calling API: ${apiUrl}`);
@@ -48,7 +79,7 @@ jobs:
 
             const body = {
               "user_id": "ftsai", 
-              "prompts": ["what is a good test in unit testing?"],
+              "prompts": [`Summarize the changes in this pull request: \n\n${patchContent}`],
               "model": "ollama.deepseek-r1:latest"
             }
 
