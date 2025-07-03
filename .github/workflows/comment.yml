@@ -21,11 +21,18 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Debug repository info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo "PR base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
+
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
 
       - name: Add comment to PR
         uses: actions/github-script@v7
@@ -39,7 +46,19 @@ jobs:
             const issue_number = context.issue.number;
 
             // Create a patch file containing all changes
-            execSync(`git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch`);
+            try {
+              execSync(`git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch`);
+            } catch (error) {
+              console.log('Error creating git diff:', error.message);
+              // Try alternative method
+              try {
+                execSync(`git diff HEAD~1 HEAD > changes.patch`);
+                console.log('Used HEAD~1 HEAD as fallback for git diff');
+              } catch (fallbackError) {
+                console.log('Fallback git diff also failed:', fallbackError.message);
+                return;
+              }
+            }
             
             // Read the patch file content
             let patchContent = '';
