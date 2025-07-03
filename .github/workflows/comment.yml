@@ -89,6 +89,9 @@ jobs:
               headers: headers,
               body: JSON.stringify(body)
             });
+            
+            console.log(`HTTP Response Code: ${response.status} ${response.statusText}`);
+            
             const data = await response.json();
             
             console.log(`data received: ${data.response}`)
