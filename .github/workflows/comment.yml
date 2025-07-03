@@ -18,17 +18,10 @@ jobs:
 
     # This gives the action the necessary permissions to write a comment on the pull request.
     permissions:
+      contents: read
       pull-requests: write
 
     steps:
-      - name: Debug repository info
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Repository owner: ${{ github.repository_owner }}"
-          echo "Event name: ${{ github.event_name }}"
-          echo "PR base SHA: ${{ github.event.pull_request.base.sha }}"
-          echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
-
       - name: Check out repository
         uses: actions/checkout@v4
         with:
