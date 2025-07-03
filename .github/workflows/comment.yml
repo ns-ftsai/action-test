@@ -69,8 +69,7 @@ jobs:
               return;
             }
 
-            const apiUrl = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';
-            console.log(`Calling API: ${apiUrl}`);
+            const apiUrl = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';            
             
             const headers = {
               'Content-Type': 'application/json',
@@ -92,8 +91,7 @@ jobs:
             });
             const data = await response.json();
             
-            console.log('data received')
-            console.log(data)
+            console.log(`data received: ${data.response}`)
 
             // Format the comment with better styling
             const formattedComment = `## 🤖 AI Code Review Summary
