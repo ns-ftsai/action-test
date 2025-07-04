@@ -104,8 +104,8 @@ jobs:
             console.log(`data received:`, data);
             
             // Use the response directly since it's already in markdown format
-            const markdownResponse = data.response;
-            
+            let markdownResponse = data.response;
+
             // Ensure newlines are properly formatted
             markdownResponse = markdownResponse.replace(/\\n/g, '\n'); 
             console.log(`Markdown response:`, markdownResponse);
