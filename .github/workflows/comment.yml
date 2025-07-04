@@ -38,14 +38,14 @@ jobs:
             // Get the pull request number from the event context
             const issue_number = context.issue.number;
 
-            // Create a patch file containing all changes
+            // Create a patch file containing only changes under /test and /tests directories
             try {
-              execSync(`git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changes.patch`);
+              execSync(`git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- test/ tests/ > changes.patch`);
             } catch (error) {
               console.log('Error creating git diff:', error.message);
               // Try alternative method
               try {
-                execSync(`git diff HEAD~1 HEAD > changes.patch`);
+                execSync(`git diff HEAD~1 HEAD -- test/ tests/ > changes.patch`);
                 console.log('Used HEAD~1 HEAD as fallback for git diff');
               } catch (fallbackError) {
                 console.log('Fallback git diff also failed:', fallbackError.message);
