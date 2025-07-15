@@ -1,0 +1,25 @@
+name: PR Comment Bot
+
+on:
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+
+jobs:
+  Comment-on-PR:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        # We need the full history to be able to diff between base and head SHA
+        with:
+          fetch-depth: 0
+
+      - name: Run PR Comment Bot
+        uses: ./ # This refers to the action in the root of your repository
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
