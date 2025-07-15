@@ -1,1 +1,22 @@
-esokfpeokgp[esokfpeokgpeafp'kop]
+**Changes in this pull request:**
+### Code Changes
+
+* Removed two `console.log` statements that were logging the API URL and HTTP response code.
+* Removed a `console.log` statement that was logging the data received from the API.
+* Added a new `console.log` statement that logs the parsed response data.
+* Added a new `let` variable `responseData` to store the parsed response data.
+* If the response data is a string, parse it as JSON using `JSON.parse`.
+* If the response data is not a string, use it as is.
+* Format the comment with better styling using GitHub Flavored Markdown.
+* Added a `details` section to the comment with analysis details.
+* Updated the comment body to use the `formattedComment` variable.
+
+### Changes to the Comment Body
+* The prompt for the code review summary was updated to:
+`Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:`
+* The comment body was updated to use the `formattedComment` variable, which includes a title, analysis summary, and analysis details.
+
+### Changes to the Comment Body (continued)
+* The comment body was updated to use a more structured format, with a title, analysis summary, and analysis details.
+* The analysis details include the model used, generated date, and prompt.
+* The comment body is now formatted using GitHub Flavored Markdown.
