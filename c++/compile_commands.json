@@ -1,0 +1,7 @@
+[
+    {
+        "directory": "/Users/ftsai/action-test/c++",
+        "command": "/usr/bin/c++ -g -std=c++17 -o CMakeFiles/lsp_test_app.dir/main.cpp.o -c /Users/ftsai/action-test/c++/main.cpp",
+        "file": "/Users/ftsai/action-test/c++/main.cpp"
+    }
+]

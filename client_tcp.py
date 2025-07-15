@@ -1,6 +1,7 @@
 import json
 import socket
 import time
+import os
 
 class LSPClient:
     def __init__(self, host="127.0.0.1", port=2087):
@@ -54,7 +55,7 @@ client = LSPClient()
 # 1. Initialize
 init_params = {
     "processId": None,
-    "rootUri": "file:///Users/justinl/Desktop/language-server-test",
+    "rootUri": os.getcwd(),
     "capabilities": {}
 }
 
@@ -66,8 +67,8 @@ print("Sending initialized notification...")
 client.send_notification("initialized", {})
 
 # 3. Open document
-file_uri = "file:///Users/justinl/Desktop/language-server-test/test_definition_search.py"
-with open("/Users/justinl/Desktop/language-server-test/test_definition_search.py", "r") as f:
+file_uri = os.path.join(os.getcwd(), "print.py")
+with open(file_uri, "r") as f:
     file_content = f.read()
 
 open_params = {
@@ -84,7 +85,7 @@ client.send_notification("textDocument/didOpen", open_params)
 # 4. Go to definition
 def_params = {
     "textDocument": {"uri": file_uri},
-    "position": {"line": 31, "character": 17}
+    "position": {"line": 6, "character": 1}
 }
 print("Getting definition...")
 print(client.send_request("textDocument/definition", def_params))
