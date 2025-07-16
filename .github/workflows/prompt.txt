@@ -23,13 +23,11 @@ Brief introduction to the code changes in this file.
 
 <br>
 
-<br>
-
--   **Rating:** 7/10
--   **Code Quality:** Overall, the code is well writen, with clear and descriptive variable names. The use of `pytest.mark.parametrize` is also a good practice, as it allows for multiple test cases to be run with a single test function.
--   **Suggestion:** The error handling in `fetchData` could be more robust. Consider adding a `finally` block to ensure cleanup happens regardless of success or failure.
--   **Question:** The timeout is hardcoded at 5000ms. Should this be configurable via an argument?
--   **Nitpick:** The comment on line 23 is slightly out of date.
+**Rating:** 7/10
+**Code Quality:** Overall, the code is well writen, with clear and descriptive variable names. The use of `pytest.mark.parametrize` is also a good practice, as it allows for multiple test cases to be run with a single test function.
+**Suggestion:** The error handling in `fetchData` could be more robust. Consider adding a `finally` block to ensure cleanup happens regardless of success or failure.
+**Question:** The timeout is hardcoded at 5000ms. Should this be configurable via an argument?
+**Nitpick:** The comment on line 23 is slightly out of date.
 
 <br>
 </details>
@@ -41,13 +39,10 @@ Brief introduction to the code changes in this file.
 
 <br>
 
-<br>
-
--   **Rating:** 10/10
--   **Code Quality:** Overall, the code is excellently writen,it covers all edge cases.
+**Rating:** 10/10
+**Code Quality:** Overall, the code is excellently writen,it covers all edge cases.
 <br>
 </details>
-
 
 ---
 
