@@ -76,9 +76,23 @@ jobs:
               'x-api-key': 'ojR4WdbesL8l3pXNhsBlVau1FwBq5u9i1WL1nA16' 
             };
 
+            // Read the prompt template from file
+            let promptTemplate = '';
+            try {
+              promptTemplate = fs.readFileSync('.github/workflows/prompt.txt', 'utf8');
+              console.log('Prompt template loaded successfully');
+            } catch (error) {
+              console.log('Error reading prompt file:', error);
+              // Fallback to default prompt if file doesn't exist
+              promptTemplate = 'Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}';
+            }
+
+            // Replace the placeholder with actual patch content
+            const finalPrompt = promptTemplate.replace('${patchContent}', patchContent);
+
             const body = {
               "user_id": "ftsai", 
-              "prompts": [`Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}`],
+              "prompts": [finalPrompt],
               "model": "ollama.deepseek-r1:latest"
             }
 
