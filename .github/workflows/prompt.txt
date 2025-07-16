@@ -22,6 +22,7 @@ This pull request introduces a new data fetching utility and its corresponding t
 Brief introduction to the code changes in this file.
 
 <br>
+<br>
 
 -   **Rating:** 7/10
 -   **Code Quality:** Overall, the code is well writen, with clear and descriptive variable names. The use of `pytest.mark.parametrize` is also a good practice, as it allows for multiple test cases to be run with a single test function.
@@ -37,6 +38,7 @@ Brief introduction to the code changes in this file.
 <br>
 Brief introduction to the code changes in this file.
 
+<br>
 <br>
 
 -   **Rating:** 10/10
