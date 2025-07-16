@@ -1,4 +1,8 @@
 Analyze and summarize the following code changes in this pull request, make a guess on what these changes are doing, 
-and response in GitHub Flavored Markdown format. Make sure to cover all files and seperate each file into a collapsed section.
+and response in GitHub Flavored Markdown format. Make sure to cover all files and seperate each file into a collapsed section (wrap it in 
+<details>
+<summary>File_name</summary>
+your review on this file
+</details>).
 
 ${patchContent}
