@@ -22,6 +22,7 @@ This pull request introduces a new data fetching utility and its corresponding t
 Brief introduction to the code changes in this file.
 
 <br>
+
 <br>
 
 -   **Rating:** 7/10
@@ -39,6 +40,7 @@ Brief introduction to the code changes in this file.
 Brief introduction to the code changes in this file.
 
 <br>
+
 <br>
 
 -   **Rating:** 10/10
