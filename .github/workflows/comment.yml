@@ -141,7 +141,9 @@ jobs:
 
                 ${finalPrompt}
 
-              </details>`;
+                </details>`;
+
+            </details>`;
 
             // Post a comment on the pull request
             await github.rest.issues.createComment({
