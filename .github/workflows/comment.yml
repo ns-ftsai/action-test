@@ -141,7 +141,7 @@ jobs:
 
                 ${finalPrompt}
 
-                </details>`;
+              </details>
 
             </details>`;
 
