@@ -137,11 +137,11 @@ jobs:
             - **Model Used**: ${body.model}
             - **Generated**: ${new Date().toISOString()}
             - <details>
-            <summary>Prompt:</summary>
+                <summary>Prompt:</summary>
 
-            ${finalPrompt}
+                ${finalPrompt}
 
-            </details>`;
+              </details>`;
 
             // Post a comment on the pull request
             await github.rest.issues.createComment({
