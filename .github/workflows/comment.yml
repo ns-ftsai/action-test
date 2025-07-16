@@ -136,12 +136,7 @@ jobs:
 
             - **Model Used**: ${body.model}
             - **Generated**: ${new Date().toISOString()}
-            - <details>
-                <summary>Prompt:</summary>
-
-                ${finalPrompt}
-
-              </details>
+            - **Prompt**: Analyze and summarize the following code changes in this pull request (just an example)
 
             </details>`;
 
