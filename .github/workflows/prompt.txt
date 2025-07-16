@@ -20,6 +20,7 @@ This pull request introduces a new data fetching utility and its corresponding t
 <summary><strong>📝 src/utils/api.js</strong></summary>
 <br>
 Brief introduction to the code changes in this file.
+
 <br>
 
 -   **Rating:** 7/10
@@ -36,6 +37,7 @@ Brief introduction to the code changes in this file.
 <summary><strong>📝 tests/api.test.js</strong></summary>
 <br>
 Brief introduction to the code changes in this file.
+
 <br>
 
 -   **Rating:** 10/10
