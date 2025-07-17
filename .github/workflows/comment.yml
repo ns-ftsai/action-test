@@ -108,12 +108,33 @@ jobs:
             
             // Check if the response is successful
             if (!response.ok) {
-              console.log(`API call failed with status: ${response.status} ${response.statusText}`);
-              const errorText = await response.text();
-              console.log(`Error response body: ${errorText}`);
-              return;
-            }
-            
+              if (response.status === 429) {
+                const retryDelays = [10, 30, 60, 90];
+                for (let i = 0; i < retryDelays.length; i++) {
+                  const delay = retryDelays[i];
+                  console.log(`API returned 429. Retrying in ${delay} seconds...`);
+                  await new Promise(resolve => setTimeout(resolve, delay * 1000));
+                  
+                  console.log(`Retrying API call (attempt ${i + 2})`);
+                  response = await fetch(apiUrl, {
+                  method: 'POST',
+                  headers: headers,
+                  body: JSON.stringify(body)
+                  });
+
+                  console.log(`HTTP Response Code: ${response.status} ${response.statusText}`);
+                  if (response.ok) {
+                  break; 
+                  }
+                }
+              } else {
+                console.log(`API call failed with status: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                console.log(`Error response body: ${errorText}`);
+                return; // Abort if still not successful
+              }
+            }      
+               
             const data = await response.json();
             console.log(`data received:`, data);
             
