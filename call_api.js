@@ -71,19 +71,25 @@ async function callApi(index) {
 
 /**
  * --- 3. Main Execution Logic ---
- * This function runs a simple loop to call the API 100 times.
+ * This function runs all API calls in parallel to test throttling.
  */
 async function main() {
-    console.log(`Preparing to call API ${CALL_COUNT} times...`);
+    console.log(`Preparing to call API ${CALL_COUNT} times in parallel...`);
     const startTime = Date.now();
 
-    // Loop from 0 to 99 (for 100 calls)
-    for (let i = 0; i < CALL_COUNT; i++) {
-        await callApi(i);
-    }
-
+    // Create an array of promises for all API calls
+    const promises = Array.from({ length: CALL_COUNT }, (_, i) => callApi(i));
+    
+    // Execute all calls in parallel
+    const results = await Promise.all(promises);
+    
     const duration = (Date.now() - startTime) / 1000;
     console.log(`\n--- All ${CALL_COUNT} calls completed in ${duration.toFixed(2)} seconds. ---`);
+    
+    // Log success/failure stats
+    const successful = results.filter(r => r && r.success).length;
+    const failed = results.filter(r => !r || !r.success).length;
+    console.log(`Successful calls: ${successful}, Failed calls: ${failed}`);
 }
 
 // Start the process
