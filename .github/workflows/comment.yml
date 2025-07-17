@@ -98,7 +98,7 @@ jobs:
 
             console.log(`Calling API: ${apiUrl}`);
             
-            const response = await fetch(apiUrl, {
+            let response = await fetch(apiUrl, {
               method: 'POST',
               headers: headers,
               body: JSON.stringify(body)
@@ -109,7 +109,7 @@ jobs:
             // Check if the response is successful
             if (!response.ok) {
               if (response.status === 429) {
-                const retryDelays = [10, 30, 60, 90];
+                const retryDelays = [5, 10, 20, 60];
                 for (let i = 0; i < retryDelays.length; i++) {
                   const delay = retryDelays[i];
                   console.log(`API returned 429. Retrying in ${delay} seconds...`);
@@ -124,7 +124,7 @@ jobs:
 
                   console.log(`HTTP Response Code: ${response.status} ${response.statusText}`);
                   if (response.ok) {
-                  break; 
+                    break; 
                   }
                 }
               } else {
@@ -134,7 +134,7 @@ jobs:
                 return; // Abort if still not successful
               }
             }      
-               
+
             const data = await response.json();
             console.log(`data received:`, data);
             

@@ -30,13 +30,31 @@ const requestOptions = {
 async function callApi(index) {
     console.log(`--- Starting Call #${index + 1} ---`);
     try {
-        const response = await fetch(API_URL, requestOptions);
+        let response = await fetch(API_URL, requestOptions); // Changed from const to let
 
         if (!response.ok) {
-            // Log HTTP errors like 403, 429, 500, etc.
-            const errorText = await response.text();
-            throw new Error(`HTTP error! Status: ${response.status}, Body: ${errorText}`);
-        }
+              if (response.status === 429) {
+                const retryDelays = [5, 10, 20, 40];
+                for (let i = 0; i < retryDelays.length; i++) {
+                  const delay = retryDelays[i];
+                  console.log(`API returned 429. Retrying in ${delay} seconds...`);
+                  await new Promise(resolve => setTimeout(resolve, delay * 1000));
+                  
+                  console.log(`Retrying API call (attempt ${i + 2})`);
+                  response = await fetch(API_URL, requestOptions); // Now this works
+
+                  console.log(`HTTP Response Code: ${response.status} ${response.statusText}`);
+                  if (response.ok) {
+                    break; 
+                  }
+                }
+              } else {
+                console.log(`API call failed with status: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                console.log(`Error response body: ${errorText}`);
+                return; // Abort if still not successful
+              }
+            }    
 
         // Get the JSON response from the API
         const data = await response.json();
