@@ -22,23 +22,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Add comment to PR
-        uses: actions/github-script@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-              node-version: '20'
+          node-version: '20'
 
-            - name: Install dependencies
-              run: npm install
+      - name: Install dependencies
+        run: npm install
 
-            - name: Run TS script to add comment
-              run: npx ts-node .github/scripts/pr-comment-bot.ts
-              env:
-                GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-                API_KEY: ${{ secrets.API_KEY }}
-                BASE_SHA: ${{ github.event.pull_request.base.sha }}
-                HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      - name: Run TS script to add comment
+        uses: actions/github-script@v7
+        run: npx ts-node .github/scripts/pr-comment-bot.ts
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          API_KEY: ${{ secrets.API_KEY }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
