@@ -27,13 +27,20 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install TypeScript
+        run: npm install typescript
 
-      - name: Run TS script to add comment
-        run: npx ts-node .github/scripts/pr-comment-bot.ts
+      - name: Compile TypeScript
+        run: npx tsc .github/scripts/pr-comment-bot.ts
+
+      - name: Add comment to PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const script = require('./.github/scripts/pr-comment-bot.js');
+            await script({ github, context });
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           API_KEY: ${{ secrets.API_KEY }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
