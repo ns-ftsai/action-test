@@ -15,7 +15,7 @@ interface ApiResponse {
  */
 function extractCustomPrompt(commentBody: string): string | null {
   const setPromptMatch = commentBody.match(/set-prompt\s*:\s*(.+?)(?:\n|$)/s);
-  return setPromptMatch ? setPromptMatch[1].trim() : null;
+  return setPromptMatch && setPromptMatch[1] ? setPromptMatch[1].trim() : null;
 }
 
 /**
