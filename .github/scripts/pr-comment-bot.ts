@@ -1,8 +1,10 @@
 // .github/scripts/pr-comment-bot.ts
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import * as fs from 'fs';
-import { execSync } from 'child_process';
+
+// Use CommonJS 'require' syntax to match tsconfig.json settings
+const core = require('@actions/core');
+const github = require('@actions/github');
+const fs = require('fs');
+const { execSync } = require('child_process');
 
 /**
  * Define the expected shape of the API response.
@@ -79,41 +81,40 @@ async function run(): Promise<void> {
     };
 
     core.info(`Calling API: ${apiUrl}`);
-    let response: Response | null = null;
-    const retryDelays = [5, 10, 20, 60]; // seconds
+    let response: Response;
+    
+    // Initial API call
+    response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+    });
 
-    for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
-        if (attempt > 0) {
-            const delay = retryDelays[attempt - 1];
-            core.info(`API call failed. Retrying in ${delay} seconds... (Attempt ${attempt})`);
+    // If the initial call fails with a 429, start the retry logic
+    if (!response.ok && response.status === 429) {
+        const retryDelays = [5, 10, 20, 60]; // seconds
+        for (const [index, delay] of retryDelays.entries()) {
+            core.info(`API returned 429. Retrying in ${delay} seconds... (Attempt ${index + 1})`);
             await new Promise(resolve => setTimeout(resolve, delay * 1000));
-        }
-        
-        response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(requestBody)
-        });
+            
+            response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
 
-        core.info(`HTTP Response Code: ${response.status} ${response.statusText}`);
-
-        if (response.ok) {
-            break; // Success, exit loop
-        }
-        if (response.status !== 429) {
-            // Don't retry on non-429 errors
-            const errorText = await response.text();
-            core.setFailed(`API call failed with status ${response.status}: ${errorText}`);
-            return;
+            if (response.ok) {
+                break; // Success, exit retry loop
+            }
         }
     }
     
-    if (!response || !response.ok) {
-        core.setFailed(`API call failed after all retries. Last status: ${response?.status}`);
+    if (!response.ok) {
+        const errorText = await response.text();
+        core.setFailed(`API call failed with status ${response.status}: ${errorText}`);
         return;
     }
     
-    // **FIX**: Assert the type of the JSON response to be ApiResponse
     const data = await response.json() as ApiResponse;
     let markdownResponse = data.response.replace(/\\n/g, '\n');
 
