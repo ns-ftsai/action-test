@@ -25,16 +25,15 @@ function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } 
   const eventName = github.context.eventName;
   
   if (eventName === 'pull_request') {
-    // Always run on PR events
     return { shouldRun: true, customPrompt: null };
   }
   
   if (eventName === 'issue_comment') {
     const commentBody = process.env.COMMENT_BODY || '';
     const isPullRequest = github.context.payload.issue?.pull_request !== undefined;
-    
-    // Only run if it's a PR comment and starts with @reviewer
-    if (isPullRequest && commentBody.trim().startsWith('@reviewer')) {
+
+    // Only run if it's a PR comment and starts with @Reviewer
+    if (isPullRequest && commentBody.trim().startsWith('@Reviewer')) {
       const customPrompt = extractCustomPrompt(commentBody);
       return { shouldRun: true, customPrompt };
     }
