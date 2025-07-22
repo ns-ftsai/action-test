@@ -5,6 +5,13 @@ import * as fs from 'fs';
 import { execSync } from 'child_process';
 
 /**
+ * Define the expected shape of the API response.
+ */
+interface ApiResponse {
+  response: string;
+}
+
+/**
  * The main function for the action.
  */
 async function run(): Promise<void> {
@@ -106,7 +113,8 @@ async function run(): Promise<void> {
         return;
     }
     
-    const data = await response.json();
+    // **FIX**: Assert the type of the JSON response to be ApiResponse
+    const data = await response.json() as ApiResponse;
     let markdownResponse = data.response.replace(/\\n/g, '\n');
 
     // --- 4. Format and Post Comment ---
