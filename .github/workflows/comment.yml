@@ -5,12 +5,9 @@ on:
   # This specifies that the workflow should trigger on pull_request events.
   pull_request:
     types: [opened, synchronize, reopened]
-    
-  # Trigger when someone comments on an issue or PR
+  workflow_dispatch:
   issue_comment:
     types: [created]
-    
-  workflow_dispatch:
 
 jobs:
   Comment-on-PR:
