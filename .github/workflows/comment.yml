@@ -6,6 +6,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     
+  # Trigger when someone comments on an issue or PR
+  issue_comment:
+    types: [created]
+    
   workflow_dispatch:
 
 jobs:
@@ -43,3 +47,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
