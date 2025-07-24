@@ -11,7 +11,7 @@ function extractCustomPrompt(commentBody: string): string | null {
 /* This regular expression looks for a line starting with "set-prompt:"
  * and captures the text that follows until the end of the line or the end of the string.
  */
-const setPromptMatch = commentBody.match(/set-prompt\s*:\s*(.+?)(?:\n|$)/s);
+  const setPromptMatch = commentBody.match(/set-prompt\s*:\s*(.+?)(?:\n|$)/s);
   return setPromptMatch && setPromptMatch[1] ? setPromptMatch[1].trim() : null;
 }
 
