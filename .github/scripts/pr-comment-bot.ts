@@ -12,9 +12,11 @@ function extractCustomPrompt(commentBody: string): string | null {
  * and captures the text that follows until the end of the line or the end of the string.
  */
   const setPromptMatch = commentBody.match(/set-prompt:\s*(.*)/);
-  core.info(`Extracted set-prompt match: ${setPromptMatch}`);
-  core.info(`Extracted set-prompt match[1]: ${setPromptMatch ? setPromptMatch[1] : 'null'}`);
-  return setPromptMatch && setPromptMatch[1] ? setPromptMatch[1].trim() : null;
+  if(setPromptMatch) {
+    commentBody = commentBody.replace(setPromptMatch[0], '').trim();
+  }
+  core.info(`Extracted comment body after removing set-prompt: ${commentBody}`);
+  return setPromptMatch && setPromptMatch[1] ? commentBody : null;
 }
 
 /**
