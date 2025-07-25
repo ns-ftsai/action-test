@@ -13,7 +13,7 @@ function extractCustomPrompt(commentBody: string): string | null {
  */
   const setPromptMatch = commentBody.match(/set-prompt:\s*(.*)/);
   if(setPromptMatch) {
-    commentBody = commentBody.replace(setPromptMatch[0], '').trim();
+    commentBody = commentBody.replace('@reviewer set-prompt:', '').trim();
   }
   core.info(`Extracted comment body after removing set-prompt: ${commentBody}`);
   return setPromptMatch && setPromptMatch[1] ? commentBody : null;
