@@ -6,17 +6,17 @@ inputs:
     description: 'Your API key for external services that the bot might use.'
     required: true
   github_token:
-    description: 'GitHub Token for authentication, usually provided as ${{ secrets.GITHUB_TOKEN }}.'
+    description: 'GitHub Token for authentication'
     required: true
   base_sha:
-    description: 'The base SHA of the pull request, typically ${{ github.event.pull_request.base.sha }}.'
-    required: true
+    description: 'The base SHA of the pull request'
+    required: false  # Make this optional since it might not always be available
   head_sha:
-    description: 'The head SHA of the pull request, typically ${{ github.event.pull_request.head.sha }}.'
-    required: true
+    description: 'The head SHA of the pull request'
+    required: false  # Make this optional since it might not always be available
   comment_body:
-    description: 'The body of the issue comment, typically ${{ github.event.comment.body }}. This is only relevant for "issue_comment" events.'
-    required: false # This input is optional, as it won't be present for all event types.
+    description: 'The body of the issue comment'
+    required: false
 
 outputs:
   comment_status:
@@ -27,3 +27,7 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+
+branding:
+  icon: 'message-circle'
+  color: 'blue'
