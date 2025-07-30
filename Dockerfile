@@ -4,7 +4,7 @@ FROM node:20-alpine
 
 # Set the working directory inside the container.
 # This is where all your action's files will live.
-WORKDIR /app
+WORKDIR /github/workspace
 
 # Copy package.json and package-lock.json first.
 # This is a Docker best practice: if these files don't change,
