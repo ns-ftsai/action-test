@@ -18,7 +18,7 @@ RUN npm install --frozen-lockfile
 # Copy the rest of your source code into the container.
 # This includes your `src/` directory, `tsconfig.json`, etc.
 COPY . .
-
+COPY src/prompt.txt dist/
 RUN ls -la src/
 RUN npm run build
 RUN ls -la dist/
@@ -27,9 +27,6 @@ RUN ls -la dist/
 # This executes the "build" script defined in your package.json,
 # which uses `tsc` to output files into the `dist` directory.
 RUN npm run build
-
-# Optional: Clean up devDependencies after build to reduce image size
-RUN npm prune --production
 
 # Set the container's entry point.
 # This is the command that will be executed when the container starts.
