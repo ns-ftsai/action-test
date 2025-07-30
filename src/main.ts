@@ -1,10 +1,10 @@
 // src/main.ts
 // This file will be copied to /app/src/main.ts inside the Docker container
 
-const core = require('@actions/core');
-const github = require('@actions/github');
-const fs = require('fs');
-const { execSync } = require('child_process');
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import * as fs from 'fs';
+import { execSync } from 'child_process';
 
 interface ApiResponse {
   response: string;

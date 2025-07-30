@@ -19,6 +19,10 @@ RUN npm install --frozen-lockfile
 # This includes your `src/` directory, `tsconfig.json`, etc.
 COPY . .
 
+RUN ls -la src/
+RUN npm run build
+RUN ls -la dist/
+
 # Compile your TypeScript code into JavaScript.
 # This executes the "build" script defined in your package.json,
 # which uses `tsc` to output files into the `dist` directory.
