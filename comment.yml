@@ -1,0 +1,29 @@
+name: 'PR Comment Bot Action'
+description: 'A GitHub Action to automate commenting on Pull Requests and reacting to issue comments.'
+
+inputs:
+  api_key:
+    description: 'Your API key for external services that the bot might use.'
+    required: true
+  github_token:
+    description: 'GitHub Token for authentication, usually provided as ${{ secrets.GITHUB_TOKEN }}.'
+    required: true
+  base_sha:
+    description: 'The base SHA of the pull request, typically ${{ github.event.pull_request.base.sha }}.'
+    required: true
+  head_sha:
+    description: 'The head SHA of the pull request, typically ${{ github.event.pull_request.head.sha }}.'
+    required: true
+  comment_body:
+    description: 'The body of the issue comment, typically ${{ github.event.comment.body }}. This is only relevant for "issue_comment" events.'
+    required: false # This input is optional, as it won't be present for all event types.
+
+outputs:
+  comment_status:
+    description: 'The status of the comment operation, e.g., "success", "skipped", "failed".'
+  comment_message:
+    description: 'A brief message describing the outcome of the comment operation.'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

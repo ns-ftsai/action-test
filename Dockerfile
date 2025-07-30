@@ -1,0 +1,33 @@
+# Use a lightweight official Node.js Alpine base image.
+# We're picking Node.js 20 here, as it's a current LTS version and works well with your setup.
+FROM node:20-alpine
+
+# Set the working directory inside the container.
+# This is where all your action's files will live.
+WORKDIR /app
+
+# Copy package.json and package-lock.json first.
+# This is a Docker best practice: if these files don't change,
+# Docker can use a cached layer for `npm install`, speeding up builds.
+COPY package.json package-lock.json ./
+
+# Install Node.js dependencies.
+# We use `--production` to only install the 'dependencies' (runtime deps)
+# and `--frozen-lockfile` to ensure exact versions from package-lock.json.
+RUN npm install --production --frozen-lockfile
+
+# Copy the rest of your source code into the container.
+# This includes your `src/` directory, `tsconfig.json`, etc.
+COPY . .
+
+# Compile your TypeScript code into JavaScript.
+# This executes the "build" script defined in your package.json,
+# which uses `tsc` to output files into the `dist` directory.
+RUN npm run build
+
+# Set the container's entry point.
+# This is the command that will be executed when the container starts.
+# It runs your compiled JavaScript file using Node.js.
+# Any arguments passed from action.yml (via `args`, though we decided not to use them)
+# would be available as command-line arguments (process.argv) to this Node.js script.
+ENTRYPOINT ["node", "dist/main.js"]
