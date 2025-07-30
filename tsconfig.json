@@ -26,6 +26,6 @@
     // "lib": ["es2022", "dom", "dom.iterable"] // <--- RECOMMEND REMOVING DOM LIBRARIES FOR NODE.JS ACTIONS
     "lib": ["es2022"] // <--- Simplified for Node.js environment
   },
-  "include": ["src/*.ts"], // <--- ADD THIS: Ensure all TypeScript files in src are included for compilation
+  "include": ["src/*"], // <--- ADD THIS: Ensure all TypeScript files in src are included for compilation
   "exclude": ["node_modules"] // <--- ADD THIS: Exclude node_modules to speed up compilation
 }
