@@ -11,10 +11,9 @@ WORKDIR /app
 # Docker can use a cached layer for `npm install`, speeding up builds.
 COPY package.json package-lock.json ./
 
-# Install Node.js dependencies.
-# We use `--production` to only install the 'dependencies' (runtime deps)
-# and `--frozen-lockfile` to ensure exact versions from package-lock.json.
-RUN npm install --production --frozen-lockfile
+# Install ALL dependencies (including devDependencies) to build the project
+# Remove --production flag so devDependencies like typescript are installed
+RUN npm install --frozen-lockfile
 
 # Copy the rest of your source code into the container.
 # This includes your `src/` directory, `tsconfig.json`, etc.
@@ -25,9 +24,10 @@ COPY . .
 # which uses `tsc` to output files into the `dist` directory.
 RUN npm run build
 
+# Optional: Clean up devDependencies after build to reduce image size
+RUN npm prune --production
+
 # Set the container's entry point.
 # This is the command that will be executed when the container starts.
 # It runs your compiled JavaScript file using Node.js.
-# Any arguments passed from action.yml (via `args`, though we decided not to use them)
-# would be available as command-line arguments (process.argv) to this Node.js script.
 ENTRYPOINT ["node", "dist/main.js"]
