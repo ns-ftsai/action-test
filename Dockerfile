@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 
 # Install ALL dependencies (including devDependencies) to build the project
 # Remove --production flag so devDependencies like typescript are installed
-RUN npm install --frozen-lockfile
+RUN npm install
 
 # Copy the rest of your source code into the container.
 # This includes your `src/` directory, `tsconfig.json`, etc.
@@ -22,11 +22,6 @@ COPY src/prompt.txt dist/
 RUN ls -la src/
 RUN npm run build
 RUN ls -la dist/
-
-# Compile your TypeScript code into JavaScript.
-# This executes the "build" script defined in your package.json,
-# which uses `tsc` to output files into the `dist` directory.
-RUN npm run build
 
 # Set the container's entry point.
 # This is the command that will be executed when the container starts.
