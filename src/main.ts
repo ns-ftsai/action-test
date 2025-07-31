@@ -1,10 +1,18 @@
-// src/main.ts
-// This file will be copied to /app/src/main.ts inside the Docker container
-
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
+
+const RE_SET_PROMPT = /set-prompt:\s*(.*)/;
+const RE_SET_PROMPT_INIT = /@reviewer\s*set-prompt:\s*/i;
+const PULL_REQUEST = 'pull_request';
+const ISSUE_COMMENT = 'issue_comment';
+const PATCH_FILE = 'changes.patch';
+const API_URL = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';
+const PROMPT_PATH = './src/prompt.txt'
+const FALL_BACK_PROMPT = 'Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}';
+const MODEL = 'ollama.deepseek-r1:latest';
+const USER_ID = 'ftsai';
 
 interface ApiResponse {
   response: string;
@@ -14,10 +22,10 @@ function extractCustomPrompt(commentBody: string): string | null {
   /* This regular expression looks for a line starting with "set-prompt:"
    * and captures the text that follows until the end of the line or the end of the string.
    */
-  const setPromptMatch = commentBody.match(/set-prompt:\s*(.*)/);
+  const setPromptMatch = commentBody.match(RE_SET_PROMPT);
   if (setPromptMatch) {
     // Modify commentBody to remove the trigger, so the actual prompt is clean
-    commentBody = commentBody.replace(/@reviewer\s*set-prompt:\s*/i, '').trim();
+    commentBody = commentBody.replace(RE_SET_PROMPT_INIT, '').trim();
   }
   core.info(`Extracted comment body after removing set-prompt: ${commentBody}`);
   // Return the captured group, which is the custom prompt text
@@ -30,12 +38,12 @@ function extractCustomPrompt(commentBody: string): string | null {
 function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } {
   const eventName = github.context.eventName;
 
-  if (eventName === 'pull_request') {
+  if (eventName === PULL_REQUEST) {
     core.info('Action triggered by pull_request event.');
     return { shouldRun: true, customPrompt: null };
   }
 
-  if (eventName === 'issue_comment') {
+  if (eventName === ISSUE_COMMENT) {
     // *** MODIFIED: Get COMMENT_BODY from core.getInput() ***
     const commentBody = core.getInput('comment_body', { required: false }) || '';
     core.info(`Received issue comment body: "${commentBody.trim().substring(0, 50)}..."`);
@@ -54,26 +62,19 @@ function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } 
   return { shouldRun: false, customPrompt: null };
 }
 
-/**
- * The main function for the action.
- */
 async function run(): Promise<void> {
   try {
-    // --- 0. Check if action should run ---
     const { shouldRun, customPrompt } = shouldRunAction();
     if (!shouldRun) {
       core.info('Action skipped based on trigger conditions.');
       return;
     }
 
-    // --- 1. Get Inputs and Context ---
-    // *** MODIFIED: Get all inputs using core.getInput() ***
     const token = core.getInput('github_token', { required: true });
+    const octokit = github.getOctokit(token);
     const apiKey = core.getInput('api_key', { required: true });
-    // base_sha and head_sha are mandatory inputs in action.yml
     const baseShaInput = core.getInput('base_sha', { required: true });
     const headShaInput = core.getInput('head_sha', { required: true });
-
     const context = github.context;
 
     // Handle both PR events and comment events to determine PR number
@@ -81,24 +82,19 @@ async function run(): Promise<void> {
     let baseSha: string | undefined;
     let headSha: string | undefined;
 
-    if (context.eventName === 'pull_request') {
+    if (context.eventName === PULL_REQUEST) {
       prNumber = context.payload.pull_request?.number;
-      baseSha = baseShaInput; // Use input value directly
-      headSha = headShaInput; // Use input value directly
-    } else if (context.eventName === 'issue_comment') {
-      prNumber = context.payload.issue?.number; // For comments, we need to get PR info from the issue
+      baseSha = baseShaInput;
+      headSha = headShaInput; 
+    } else if (context.eventName === ISSUE_COMMENT) {
+      // For issue_comment events, we need to extract the PR number from the issue
+      prNumber = context.payload.issue?.number;
 
       if (!prNumber) {
         core.setFailed('Could not determine pull request number from issue comment context.');
         return;
       }
 
-      // Get PR details using the GitHub API for issue_comment events
-      // This is needed if baseSha/headSha are not reliably available directly from issue_comment payload
-      // Or if the provided inputs don't cover all cases.
-      // Given your action.yml inputs, they *should* always be provided from the workflow.
-      // However, this fallback ensures robustness if the workflow fails to pass them for comments.
-      const octokit = github.getOctokit(token);
       try {
         const prResponse = await octokit.rest.pulls.get({
           owner: context.repo.owner,
@@ -114,8 +110,7 @@ async function run(): Promise<void> {
       }
     }
 
-    // Final checks for required values
-    if (!token) { // This check is technically redundant now with core.getInput({ required: true })
+    if (!token) {
       core.setFailed('GITHUB_TOKEN is not set. Please add it to the env section of the workflow or pass as input.');
       return;
     }
@@ -128,17 +123,45 @@ async function run(): Promise<void> {
         return;
     }
 
-    // --- 2. Create Git Diff Patch ---
     try {
       core.info(`Creating diff between ${baseSha} and ${headSha}`);
-      // Ensure your git repository is fully checked out and accessible.
-      // The `actions/checkout@v4` step in your workflow should ensure this.
-      execSync(`git diff ${baseSha} ${headSha} -- test/ tests/ > changes.patch`);
+      const response = await octokit.rest.repos.compareCommits({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        base: baseSha,
+        head: headSha,
+      });
+
+      const files = response.data.files;
+      if (!files) {
+        core.info(`No files changed between ${baseSha} and ${headSha}. Exiting.`);
+        core.setOutput('comment_status', 'skipped');
+        core.setOutput('comment_message', 'No relevant changes found to comment on.');
+        return;
+      }
+      const fullDiff = files.map(file => file.patch).join('\n');
+      fs.writeFileSync(PATCH_FILE, fullDiff);
+      core.info(`Git diff patch created successfully for PR #${prNumber}`);
     } catch (error) {
       core.warning(`Standard git diff failed: ${(error as Error).message}. Trying fallback.`);
       try {
-        // Fallback to diffing last commit with HEAD (less reliable but might work)
-        execSync(`git diff HEAD~1 HEAD -- test/ tests/ > changes.patch`);
+        // Fallback to diffing last commit with HEAD
+        const fallbackResponse = await octokit.rest.repos.compareCommits({
+          owner: github.context.repo.owner,
+          repo: github.context.repo.repo,
+          base: `${headSha}~1`,
+          head: headSha,
+        });
+
+        const files = fallbackResponse.data.files;
+        if (!files) {
+          core.info(`No files changed between ${baseSha} and ${headSha}. Exiting.`);
+          core.setOutput('comment_status', 'skipped');
+          core.setOutput('comment_message', 'No relevant changes found to comment on.');
+          return;
+        }
+        const fullDiff = files.map(file => file.patch).join('\n');
+        fs.writeFileSync(PATCH_FILE, fullDiff);
         core.info('Used HEAD~1 HEAD as fallback for git diff');
       } catch (fallbackError) {
         core.setFailed(`Fallback git diff also failed: ${(fallbackError as Error).message}. Ensure repository history is complete (fetch-depth: 0)`);
@@ -146,31 +169,26 @@ async function run(): Promise<void> {
       }
     }
 
-    const patchContent = fs.readFileSync('changes.patch', 'utf8');
+    const patchContent = fs.readFileSync(PATCH_FILE, 'utf8');
     if (!patchContent || patchContent.trim() === '') {
-      core.info("No content changes detected in 'test/' or 'tests/' directories. Exiting.");
-      // *** MODIFIED: Set outputs even if action is skipped ***
+      core.info("No content changes detected. Exiting.");
       core.setOutput('comment_status', 'skipped');
       core.setOutput('comment_message', 'No relevant changes found to comment on.');
       return;
     }
 
-    // --- 3. Call External API with Patch Content ---
-    const apiUrl = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';
     const headers = {
       'Content-Type': 'application/json',
       'x-api-key': apiKey || ''
     };
 
     let promptTemplate: string;
-    // *** MODIFIED: Correct path for prompt.txt inside the container ***
-    const promptFilePath = './src/prompt.txt'; // Assuming prompt.txt is now in src/
     try {
-      promptTemplate = fs.readFileSync(promptFilePath, 'utf8');
+      promptTemplate = fs.readFileSync(PROMPT_PATH, 'utf8');
       core.info('Prompt template loaded successfully from file.');
     } catch (error) {
-      core.warning(`Could not read ${promptFilePath}, using default prompt. Error: ${(error as Error).message}`);
-      promptTemplate = 'Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}';
+      core.warning(`Could not read ${PROMPT_PATH}, using default prompt. Error: ${(error as Error).message}`);
+      promptTemplate = FALL_BACK_PROMPT;
     }
 
     // If there's a custom prompt from the comment, append it to the template
@@ -181,16 +199,15 @@ async function run(): Promise<void> {
 
     const finalPrompt = promptTemplate.replace('${patchContent}', patchContent);
     const requestBody = {
-      "user_id": "ftsai",
+      "user_id": USER_ID,
       "prompts": [finalPrompt],
-      "model": "ollama.deepseek-r1:latest"
+      "model": MODEL
     };
 
-    core.info(`Calling API: ${apiUrl}`);
+    core.info(`Calling API: ${API_URL}`);
     let response: Response;
 
-    // Initial API call
-    response = await fetch(apiUrl, {
+    response = await fetch(API_URL, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(requestBody)
@@ -203,14 +220,14 @@ async function run(): Promise<void> {
         core.info(`API returned 429. Retrying in ${delay} seconds... (Attempt ${index + 1})`);
         await new Promise(resolve => setTimeout(resolve, delay * 1000));
 
-        response = await fetch(apiUrl, {
+        response = await fetch(API_URL, {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(requestBody)
         });
 
         if (response.ok) {
-          break; // Success, exit retry loop
+          break;
         }
       }
     }
@@ -226,8 +243,7 @@ async function run(): Promise<void> {
     const data = await response.json() as ApiResponse;
     let markdownResponse = data.response.replace(/\\n/g, '\n');
 
-    // --- 4. Format and Post Comment ---
-    const triggerInfo = context.eventName === 'issue_comment' ?
+    const triggerInfo = context.eventName === ISSUE_COMMENT ?
       ` (triggered by @reviewer comment${customPrompt ? ' with custom prompt' : ''})` : '';
 
     const formattedComment = `
@@ -244,7 +260,6 @@ ${markdownResponse}
 
 </details>`;
 
-    const octokit = github.getOctokit(token);
     await octokit.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
