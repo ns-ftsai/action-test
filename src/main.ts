@@ -63,6 +63,14 @@ function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } 
 
 async function run(): Promise<void> {
   try {
+     core.startGroup('Verifying Inputs');
+        // For secrets, just check if they are present, don't print the actual value.
+        core.info(`Input api_key: ${core.getInput('api_key') ? '****' : 'NOT SET'}`);
+        core.info(`Input github_token: ${core.getInput('github_token') ? '****' : 'NOT SET'}`);
+        core.info(`Input base_sha: ${core.getInput('base_sha')}`);
+        core.info(`Input head_sha: ${core.getInput('head_sha')}`);
+        core.info(`Input comment_body: '${core.getInput('comment_body')}'`);
+        core.endGroup();
     const { shouldRun, customPrompt } = shouldRunAction();
     if (!shouldRun) {
       core.info('Action skipped based on trigger conditions.');
@@ -75,15 +83,6 @@ async function run(): Promise<void> {
     const baseShaInput = core.getInput('base_sha', { required: true });
     const headShaInput = core.getInput('head_sha', { required: true });
     const context = github.context;
-
-    core.startGroup('Verifying Inputs');
-        // For secrets, just check if they are present, don't print the actual value.
-        core.info(`Input api_key: ${core.getInput('api_key') ? '****' : 'NOT SET'}`);
-        core.info(`Input github_token: ${core.getInput('github_token') ? '****' : 'NOT SET'}`);
-        core.info(`Input base_sha: ${core.getInput('base_sha')}`);
-        core.info(`Input head_sha: ${core.getInput('head_sha')}`);
-        core.info(`Input comment_body: '${core.getInput('comment_body')}'`);
-        core.endGroup();
 
     core.info(`api_key: ${apiKey}`);
 
