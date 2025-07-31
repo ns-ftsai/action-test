@@ -1,0 +1,24 @@
+name: 'PR Comment Bot Docker Runner'
+description: 'Internal Docker runner for the PR Comment Bot.'
+
+inputs:
+  api_key:
+    required: true
+  github_token:
+    required: true
+  base_sha:
+    required: true
+  head_sha:
+    required: true
+  comment_body:
+    required: false
+
+outputs:
+  comment_status:
+    description: 'Status of the comment operation.'
+  comment_message:
+    description: 'Outcome message.'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

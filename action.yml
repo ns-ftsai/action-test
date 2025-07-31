@@ -1,21 +1,16 @@
 name: 'PR Comment Bot Action'
-description: 'A GitHub Action to automate commenting on Pull Requests and reacting to issue comments.'
+description: 'Checks out the repository and runs an AI analysis on PR changes.'
 
 inputs:
   api_key:
-    description: 'Your API key for external services that the bot might use.'
+    description: 'API key for the analysis service.'
     required: true
   github_token:
-    description: 'GitHub Token for authentication'
+    description: 'GitHub Token for authentication.'
     required: true
-  base_sha:
-    description: 'The base SHA of the pull request'
-    required: false  # Make this optional since it might not always be available
-  head_sha:
-    description: 'The head SHA of the pull request'
-    required: false  # Make this optional since it might not always be available
+    default: ${{ github.token }}
   comment_body:
-    description: 'The body of the issue comment'
+    description: 'The body of the issue comment, if applicable.'
     required: false
 
 outputs:
@@ -25,9 +20,26 @@ outputs:
     description: 'A brief message describing the outcome of the comment operation.'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      id: checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-branding:
-  icon: 'message-circle'
-  color: 'blue'
+    - name: Run Analysis Container
+      id: analysis
+      uses: docker://./
+      with:
+        api_key: ${{ inputs.api_key }}
+        github_token: ${{ inputs.github_token }}
+        base_sha: ${{ github.event.pull_request.base.sha || github.event.before }}
+        head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+        comment_body: ${{ inputs.comment_body }}
+
+    - name: Set action outputs
+      shell: bash
+      run: |
+        echo "comment_status=${{ steps.analysis.outputs.comment_status }}" >> $GITHUB_OUTPUT
+        echo "comment_message=${{ steps.analysis.outputs.comment_message }}" >> $GITHUB_OUTPUT
