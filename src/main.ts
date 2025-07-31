@@ -37,6 +37,8 @@ function extractCustomPrompt(commentBody: string): string | null {
 function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } {
   const eventName = github.context.eventName;
 
+  core.info(`Event name: ${eventName}`);
+
   if (eventName === PULL_REQUEST) {
     core.info('Action triggered by pull_request event.');
     return { shouldRun: true, customPrompt: null };
@@ -61,16 +63,20 @@ function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } 
   return { shouldRun: false, customPrompt: null };
 }
 
+function verifyInputs(): void {
+  core.startGroup('Verifying Inputs');
+        // For secrets, just check if they are present, don't print the actual value.
+  core.info(`Input api_key: ${core.getInput('api_key') ? '****' : 'NOT SET'}`);
+  core.info(`Input github_token: ${core.getInput('github_token') ? '****' : 'NOT SET'}`);
+  core.info(`Input base_sha: ${core.getInput('base_sha')}`);
+  core.info(`Input head_sha: ${core.getInput('head_sha')}`);
+  core.info(`Input comment_body: '${core.getInput('comment_body')}'`);
+  core.endGroup();
+}
+
 async function run(): Promise<void> {
   try {
-     core.startGroup('Verifying Inputs');
-        // For secrets, just check if they are present, don't print the actual value.
-        core.info(`Input api_key: ${core.getInput('api_key') ? '****' : 'NOT SET'}`);
-        core.info(`Input github_token: ${core.getInput('github_token') ? '****' : 'NOT SET'}`);
-        core.info(`Input base_sha: ${core.getInput('base_sha')}`);
-        core.info(`Input head_sha: ${core.getInput('head_sha')}`);
-        core.info(`Input comment_body: '${core.getInput('comment_body')}'`);
-        core.endGroup();
+    verifyInputs();
     const { shouldRun, customPrompt } = shouldRunAction();
     if (!shouldRun) {
       core.info('Action skipped based on trigger conditions.');
