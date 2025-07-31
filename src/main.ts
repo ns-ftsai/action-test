@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
-import { execSync } from 'child_process';
 
 const RE_SET_PROMPT = /set-prompt:\s*(.*)/;
 const RE_SET_PROMPT_INIT = /@reviewer\s*set-prompt:\s*/i;
@@ -76,6 +75,8 @@ async function run(): Promise<void> {
     const baseShaInput = core.getInput('base_sha', { required: true });
     const headShaInput = core.getInput('head_sha', { required: true });
     const context = github.context;
+
+    core.info(`api_key: ${apiKey}`);
 
     // Handle both PR events and comment events to determine PR number
     let prNumber: number | undefined;
