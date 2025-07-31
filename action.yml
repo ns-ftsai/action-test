@@ -8,7 +8,6 @@ inputs:
   github_token:
     description: 'GitHub Token for authentication.'
     required: true
-    default: ${{ github.token }}
   comment_body:
     description: 'The body of the issue comment, if applicable.'
     required: false
@@ -28,15 +27,22 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: Build Docker image
+      shell: bash
+      run: docker build -t pr-comment-bot:latest ${{ github.action_path }}
+
     - name: Run Analysis Container
       id: analysis
-      uses: docker://./
-      with:
-        api_key: ${{ inputs.api_key }}
-        github_token: ${{ inputs.github_token }}
-        base_sha: ${{ github.event.pull_request.base.sha || github.event.before }}
-        head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
-        comment_body: ${{ inputs.comment_body }}
+      shell: bash
+      run: |
+        docker run --workdir /github/workspace \
+          -v "/github/workspace":"/github/workspace" \
+          -e INPUT_API_KEY=${{ inputs.api_key }} \
+          -e INPUT_GITHUB_TOKEN=${{ inputs.github_token }} \
+          -e INPUT_BASE_SHA=${{ github.event.pull_request.base.sha || github.event.before }} \
+          -e INPUT_HEAD_SHA=${{ github.event.pull_request.head.sha || github.event.after }} \
+          -e INPUT_COMMENT_BODY='${{ inputs.comment_body }}' \
+          pr-comment-bot:latest
 
     - name: Set action outputs
       shell: bash
