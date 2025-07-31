@@ -76,6 +76,15 @@ async function run(): Promise<void> {
     const headShaInput = core.getInput('head_sha', { required: true });
     const context = github.context;
 
+    core.startGroup('Verifying Inputs');
+        // For secrets, just check if they are present, don't print the actual value.
+        core.info(`Input api_key: ${core.getInput('api_key') ? '****' : 'NOT SET'}`);
+        core.info(`Input github_token: ${core.getInput('github_token') ? '****' : 'NOT SET'}`);
+        core.info(`Input base_sha: ${core.getInput('base_sha')}`);
+        core.info(`Input head_sha: ${core.getInput('head_sha')}`);
+        core.info(`Input comment_body: '${core.getInput('comment_body')}'`);
+        core.endGroup();
+
     core.info(`api_key: ${apiKey}`);
 
     // Handle both PR events and comment events to determine PR number
