@@ -206,8 +206,8 @@ async function run(): Promise<void> {
     };
 
     core.info(`Calling API: ${API_URL}`);
-    let response: Response;
 
+    let response: Response;
     response = await fetch(API_URL, {
       method: 'POST',
       headers: headers,
@@ -235,7 +235,7 @@ async function run(): Promise<void> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      core.setFailed(`API call failed with status ${response.status}: ${errorText}`);
+      core.warning(`API call failed with status ${response.status}: ${errorText}`);
       core.setOutput('comment_status', 'api_error');
       core.setOutput('comment_message', `API call failed: ${response.status}`);
       return;
