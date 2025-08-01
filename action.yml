@@ -8,9 +8,6 @@ inputs:
   github_token:
     description: 'GitHub Token for authentication.'
     required: true
-  comment_body:
-    description: 'The body of the issue comment, if applicable.'
-    required: false
 
 outputs:
   comment_status:
@@ -41,7 +38,11 @@ runs:
           -e INPUT_GITHUB_TOKEN=${{ inputs.github_token }} \
           -e INPUT_BASE_SHA=${{ github.event.pull_request.base.sha || github.event.before }} \
           -e INPUT_HEAD_SHA=${{ github.event.pull_request.head.sha || github.event.after }} \
-          -e INPUT_COMMENT_BODY='${{ inputs.comment_body }}' \
+          -e INPUT_COMMENT_BODY='${{ github.event.comment.body }}' \
+          -e GITHUB_EVENT_NAME=${{ github.event_name }} \
+          -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH \
+          -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
+          -e GITHUB_ACTOR=$GITHUB_ACTOR \
           pr-comment-bot:latest
 
     - name: Set action outputs
