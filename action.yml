@@ -44,6 +44,7 @@ runs:
           -e GITHUB_EVENT_PATH="/github/workflow/event.json" \
           -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
           -e GITHUB_ACTOR=$GITHUB_ACTOR \
+          -e GITHUB_OUTPUT=$GITHUB_OUTPUT \
           pr-comment-bot:latest
 
     - name: Set action outputs

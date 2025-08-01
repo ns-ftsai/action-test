@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
+import * as path from 'path'; // <-- 1. Import the 'path' module
 
 const RE_SET_PROMPT = /set-prompt:\s*(.*)/;
 const RE_SET_PROMPT_INIT = /@reviewer\s*set-prompt:\s*/i;
@@ -8,7 +9,7 @@ const PULL_REQUEST = 'pull_request';
 const ISSUE_COMMENT = 'issue_comment';
 const PATCH_FILE = 'changes.patch';
 const API_URL = 'https://4djfomzutg.execute-api.us-west-2.amazonaws.com/v1/api';
-const PROMPT_PATH = './src/prompt.txt'
+const PROMPT_PATH = path.join(__dirname, '..', 'src', 'prompt.txt');
 const FALL_BACK_PROMPT = 'Analyze and summarize the following code changes in this pull request, and response in GitHub Flavored Markdown format:\n\n${patchContent}';
 const MODEL = 'ollama.deepseek-r1:latest';
 const USER_ID = 'ftsai';
@@ -35,7 +36,15 @@ function extractCustomPrompt(commentBody: string): string | null {
  * Check if the action should run based on the trigger type and comment content
  */
 function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } {
+
+  
+  // here is why the script is not running
+  // fix it
+  // be noted
   const eventName = github.context.eventName;
+
+  // this line here
+  // end
 
   core.info(`Event name: ${eventName}`);
 
@@ -45,7 +54,6 @@ function shouldRunAction(): { shouldRun: boolean; customPrompt: string | null } 
   }
 
   if (eventName === ISSUE_COMMENT) {
-    // *** MODIFIED: Get COMMENT_BODY from core.getInput() ***
     const commentBody = core.getInput('comment_body', { required: false }) || '';
     core.info(`Received issue comment body: "${commentBody.trim().substring(0, 50)}..."`);
     
