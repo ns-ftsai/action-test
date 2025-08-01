@@ -255,16 +255,15 @@ async function run(): Promise<void> {
       }
     }
 
+    let markdownResponse = '';
     if (!response.ok) {
       const errorText = await response.text();
       core.warning(`API call failed with status ${response.status}: ${errorText}`);
-      core.setOutput('comment_status', 'api_error');
-      core.setOutput('comment_message', `API call failed: ${response.status}`);
-      return;
+      markdownResponse = `**Error:** NSChat is failing with status ${response.status}. Please contact AILab team for help.`;
+    }else {
+      const data = await response.json() as ApiResponse;
+      markdownResponse = data.response.replace(/\\n/g, '\n');
     }
-
-    const data = await response.json() as ApiResponse;
-    let markdownResponse = data.response.replace(/\\n/g, '\n');
 
     const triggerInfo = context.eventName === ISSUE_COMMENT ?
       ` (triggered by @reviewer comment${customPrompt ? ' with custom prompt' : ''})` : '';
