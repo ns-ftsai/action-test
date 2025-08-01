@@ -260,7 +260,7 @@ async function run(): Promise<void> {
     if (!response.ok) {
       const errorText = await response.text();
       core.warning(`API call failed with status ${response.status}: ${errorText}`);
-      markdownResponse = `> [!CAUTION]\n> **Error:** NSChat is failing with status ${response.status}. Please contact the AILab team for help.`;
+      markdownResponse = `> [!CAUTION]\n> **Error:** NSChat is failing with status ${response.status}. Please contact AI Labs for more information.`;
       formattedComment = `${markdownResponse}`;
     }else {
       const data = await response.json() as ApiResponse;
