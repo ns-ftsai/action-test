@@ -34,13 +34,14 @@ runs:
       run: |
         docker run --workdir /github/workspace \
           -v "/github/workspace":"/github/workspace" \
+          -v "$GITHUB_EVENT_PATH":"/github/workflow/event.json" \
           -e INPUT_API_KEY=${{ inputs.api_key }} \
           -e INPUT_GITHUB_TOKEN=${{ inputs.github_token }} \
           -e INPUT_BASE_SHA=${{ github.event.pull_request.base.sha || github.event.before }} \
           -e INPUT_HEAD_SHA=${{ github.event.pull_request.head.sha || github.event.after }} \
           -e INPUT_COMMENT_BODY='${{ github.event.comment.body }}' \
           -e GITHUB_EVENT_NAME=${{ github.event_name }} \
-          -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH \
+          -e GITHUB_EVENT_PATH="/github/workflow/event.json" \
           -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY \
           -e GITHUB_ACTOR=$GITHUB_ACTOR \
           pr-comment-bot:latest
